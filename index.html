@@ -1,0 +1,1399 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>王六六商行租号计算器</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+        }
+        body {
+            padding: 10px;
+            background: #f0f4f8;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .calculator {
+            width: 100%;
+            max-width: 400px;
+            background: #ffffff;
+            border-radius: 16px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+            overflow: hidden;
+            transition: all 0.3s ease;
+            position: relative;
+            -webkit-overflow-scrolling: touch;
+        }
+        .header {
+            background: linear-gradient(135deg, #007AFF, #0056b3);
+            color: white;
+            padding: 20px;
+            text-align: center;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .header h1:hover {
+            transform: scale(1.05);
+        }
+        .content {
+            padding: 16px;
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group label {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 14px;
+            color: #333;
+            font-weight: 500;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            background: #f9fafb;
+            transition: all 0.3s ease;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+            -webkit-tap-highlight-color: transparent;
+            touch-action: manipulation;
+        }
+        .input-group input:focus {
+            border-color: #007AFF;
+            background: #fff;
+            outline: none;
+        }
+        .tip {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+        .private-option {
+            margin-top: 12px;
+            padding: 8px;
+            background: #f0f4f8;
+            border-radius: 8px;
+            font-size: 12px;
+            color: #666;
+        }
+        .private-option label {
+            margin-right: 12px;
+            cursor: pointer;
+        }
+        .result-section {
+            margin-top: 20px;
+            padding: 16px;
+            background: #f0f4f8;
+            border-radius: 12px;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .result-label {
+            font-size: 14px;
+            color: #666;
+        }
+        .result-value {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            position: relative;
+            cursor: pointer;
+        }
+        .copy-btn {
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 122, 255, 0.1);
+            border: none;
+            border-radius: 4px;
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: #007AFF;
+            opacity: 0;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+        }
+        .result-value:hover .copy-btn {
+            opacity: 1;
+            right: -30px;
+        }
+        .copy-btn:hover {
+            background: rgba(0, 122, 255, 0.2);
+            transform: translateY(-50%) scale(1.1);
+        }
+        .final-total {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 2px solid #007AFF;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .final-total .result-label {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+        .final-total .result-value {
+            font-size: 22px;
+            color: #007AFF;
+            transition: all 0.3s ease;
+        }
+        .final-total .result-value:hover {
+            color: #0056b3;
+            transform: scale(1.02);
+        }
+        .button-group {
+            display: flex;
+            gap: 8px;
+            margin-top: 16px;
+        }
+        .btn {
+            flex: 1;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+        .btn-primary {
+            background: #007AFF;
+            color: white;
+        }
+        .btn-primary:hover {
+            background: #0056b3;
+        }
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+        .btn-danger:hover {
+            background: #c82333;
+        }
+        .action-buttons {
+            margin-top: 16px;
+            display: flex;
+            gap: 8px;
+        }
+        .contact-section {
+            margin-top: 20px;
+            padding: 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 12px;
+            text-align: center;
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        .contact-section:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        .contact-section h3 {
+            margin: 0 0 8px 0;
+            font-size: 16px;
+            font-weight: 600;
+        }
+        .contact-section p {
+            margin: 0;
+            font-size: 14px;
+            opacity: 0.9;
+        }
+        .contact-info {
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            margin-top: 12px;
+            flex-wrap: wrap;
+        }
+        .contact-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 13px;
+            background: rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 20px;
+            backdrop-filter: blur(10px);
+        }
+        .contact-item:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        .record-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            font-size: 12px;
+        }
+        .record-item:last-child {
+            border-bottom: none;
+        }
+        .fade-in {
+            animation: fadeIn 0.3s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .pulse {
+            animation: pulse 0.5s ease-in-out;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        /* 修复模态框按钮样式 */
+        .modal .btn {
+            padding: 8px 16px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="calculator">
+        <div class="header">
+            <h1 id="headerTitle">王六六商行租号计算器</h1>
+        </div>
+        <div class="content">
+            <div class="input-group">
+                <label>现金M</label>
+                <input type="number" id="cashM" placeholder="100" oninput="calculate()">
+            </div>
+            <div class="input-group">
+                <label>兑换比例</label>
+                <input type="number" id="ratio" placeholder="30" oninput="calculate()">
+            </div>
+
+            <div class="input-group">
+                <label>满耐六套</label>
+                <input type="number" id="equipCount" placeholder="10" oninput="calculate()">
+                <div class="tip">头甲2元/件</div>
+            </div>
+
+            <div class="input-group">
+                <label>AWM子弹数量</label>
+                <input type="number" id="bulletCount" placeholder="100" oninput="calculate()">
+            </div>
+
+            <div class="private-option">
+                <label>
+                    <input type="radio" name="feeMode" value="minus" checked onchange="calculate()">
+                    收号主5%
+                </label>
+                <label>
+                    <input type="radio" name="feeMode" value="plus" onchange="calculate()">
+                    收租客5%
+                </label>
+            </div>
+
+            <div class="input-group" id="depositGroup" style="display: none;">
+                <label>押金</label>
+                <input type="number" id="deposit" placeholder="200" oninput="calculate()">
+            </div>
+
+            <div class="result-section">
+                <div class="result-item">
+                    <span class="result-label">纯币价</span>
+                    <span class="result-value" id="coinPrice">
+                        0.00 元
+                        <button class="copy-btn" onclick="copyToClipboard('coinPrice')" title="复制">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">六涛+AWM</span>
+                    <span class="result-value" id="equipBulletPrice">
+                        0.00 元
+                        <button class="copy-btn" onclick="copyToClipboard('equipBulletPrice')" title="复制">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </span>
+                </div>
+                <div class="result-item" id="depositItem" style="display: none;">
+                    <span class="result-label">押金</span>
+                    <span class="result-value" id="depositPrice">
+                        0.00 元
+                        <button class="copy-btn" onclick="copyToClipboard('depositPrice')" title="复制">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </span>
+                </div>
+                <div class="result-item">
+                    <span class="result-label">5%纯币手续费</span>
+                    <span class="result-value" id="feeAmount">
+                        0.00 元
+                        <button class="copy-btn" onclick="copyToClipboard('feeAmount')" title="复制">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </span>
+                </div>
+                <div class="final-total" id="showRecordsBtn">
+                    <span class="result-label" id="finalPriceLabel">最终到账总价</span>
+                    <span class="result-value" id="finalPrice">
+                        0.00 元
+                        <button class="copy-btn" onclick="copyToClipboard('finalPrice')" title="复制">
+                            <i class="fa fa-copy"></i>
+                        </button>
+                    </span>
+                </div>
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="saveRecordBtn" onclick="saveRecord()">📝 记账</button>
+                <button class="btn btn-danger" onclick="clearAll()">清空输入</button>
+            </div>
+
+            <!-- 联系方式区域 -->
+            <div class="contact-section" onclick="showContactInfo()">
+                <h3>👋 联系王六六</h3>
+                <p>租号、3x3、代肝、撞车，专业服务</p>
+                <div class="contact-info">
+                    <div class="contact-item" onclick="showQRCode('wechat', event)">
+                        <i class="fa fa-weixin"></i>
+                        <span>微信</span>
+                    </div>
+                    <div class="contact-item" onclick="showQRCode('qq', event)">
+                        <i class="fa fa-qq"></i>
+                        <span>QQ</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // 本地存储账单 - 核心方法封装
+        function getRecords() {
+            return JSON.parse(localStorage.getItem('allRecords') || '[]');
+        }
+        
+        function saveRecords(records) {
+            localStorage.setItem('allRecords', JSON.stringify(records));
+        }
+        
+        function addRecord(data) {
+            let list = getRecords();
+            list.push(data);
+            saveRecords(list);
+        }
+
+        // 查看账单记录（长按或点击查看按钮）
+        let pressTimer;
+        let tapCount = 0;
+        let headerPressTimer; // 标题长按计时器
+        
+        // 长按查看账单
+        document.getElementById('showRecordsBtn').addEventListener('mousedown', function(e) {
+            pressTimer = setTimeout(function() {
+                showAllRecords();
+            }, 500); // 500毫秒长按
+        });
+        
+        document.getElementById('showRecordsBtn').addEventListener('mouseup', function() {
+            clearTimeout(pressTimer);
+        });
+        
+        document.getElementById('showRecordsBtn').addEventListener('mouseleave', function() {
+            clearTimeout(pressTimer);
+        });
+        
+        // 移动端触摸事件
+        document.getElementById('showRecordsBtn').addEventListener('touchstart', function(e) {
+            pressTimer = setTimeout(function() {
+                showAllRecords();
+            }, 500);
+        });
+        
+        document.getElementById('showRecordsBtn').addEventListener('touchend', function() {
+            clearTimeout(pressTimer);
+        });
+        
+        // 点击查看按钮
+        document.getElementById('showRecordsBtn').addEventListener('click', function() {
+            tapCount++;
+            if (tapCount >= 3) { // 从5次减少到3次，更友好
+                tapCount = 0;
+                showAllRecords();
+            } else if (tapCount === 1) {
+                // 第一次点击时显示提示
+                showToast('长按或连续点击3次查看账单', 'info');
+            }
+        });
+        
+        function showAllRecords() {
+            let records = getRecords();
+            if (records.length === 0) {
+                showToast('暂无记录', 'info');
+                return;
+            }
+            
+            let text = '📋 全部账单记录\n';
+            records.forEach((r, i) => {
+                text += `\n${i+1}. ${r.time}\n`;
+                text += `纯币价：${r.coinPrice ? r.coinPrice.toFixed(2) : '0.00'} 元\n`;
+                text += `六涛+AWM：${r.equipBulletPrice ? r.equipBulletPrice.toFixed(2) : '0.00'} 元\n`;
+                text += `手续费：${r.fee.toFixed(2)} 元\n`;
+                text += `押金：${r.deposit.toFixed(2)} 元\n`;
+                text += `总价：${r.final.toFixed(2)} 元\n`;
+            });
+            
+            // 如果记录太多，显示在模态框中而不是alert
+            if (records.length > 10) {
+                showModal('账单记录', `
+                    <div style="max-height: 70vh; overflow-y: auto; font-size: 12px; line-height: 1.6;">
+                        <pre style="white-space: pre-wrap; word-wrap: break-word;">${text}</pre>
+                    </div>
+                `);
+            } else {
+                alert(text);
+            }
+        }
+
+        // 计算逻辑
+        function calculate() {
+            const cashM = parseFloat(document.getElementById('cashM').value) || 0;
+            const ratio = parseFloat(document.getElementById('ratio').value) || 1;
+            const equipCount = parseFloat(document.getElementById('equipCount').value) || 0;
+            const bulletCount = parseFloat(document.getElementById('bulletCount').value) || 0;
+            const deposit = parseFloat(document.getElementById('deposit').value) || 0;
+            const feeMode = document.querySelector('input[name="feeMode"]:checked').value;
+
+            // 输入验证
+            if (ratio <= 0) {
+                showToast('兑换比例必须大于0');
+                return;
+            }
+
+            const cashValue = cashM * 100;
+            const coinPrice = cashValue / ratio;
+            const equipPrice = equipCount * 2;
+            const bulletPrice = bulletCount * 0.8;
+            
+            const originalPrice = coinPrice + equipPrice + bulletPrice;
+            const feeAmount = coinPrice * 0.05;
+
+            let finalPrice;
+            if (feeMode === 'minus') {
+                finalPrice = originalPrice - feeAmount;
+                document.getElementById('depositGroup').style.display = 'none';
+            } else {
+                finalPrice = originalPrice + feeAmount + deposit;
+                document.getElementById('depositGroup').style.display = 'block';
+            }
+
+            // 添加动画效果
+            const coinPriceEl = document.getElementById('coinPrice');
+            const equipBulletPriceEl = document.getElementById('equipBulletPrice');
+            const depositPriceEl = document.getElementById('depositPrice');
+            const feeAmountEl = document.getElementById('feeAmount');
+            const finalPriceEl = document.getElementById('finalPrice');
+            const depositItemEl = document.getElementById('depositItem');
+
+            const equipBulletPrice = equipPrice + bulletPrice;
+            
+            // 更新显示
+            coinPriceEl.innerText = coinPrice.toFixed(2) + ' 元';
+            equipBulletPriceEl.innerText = equipBulletPrice.toFixed(2) + ' 元';
+            depositPriceEl.innerText = deposit.toFixed(2) + ' 元';
+            feeAmountEl.innerText = feeAmount.toFixed(2) + ' 元';
+            finalPriceEl.innerText = finalPrice.toFixed(2) + ' 元';
+            
+            // 控制押金显示
+            if (feeMode === 'plus') {
+                depositItemEl.style.display = 'flex';
+            } else {
+                depositItemEl.style.display = 'none';
+            }
+
+            // 更新最终价格标签
+            const finalPriceLabel = document.getElementById('finalPriceLabel');
+            finalPriceLabel.textContent = feeMode === 'minus' ? '最终到账总价' : '最终租号总价';
+
+            // 添加脉冲动画
+            [coinPriceEl, equipBulletPriceEl, feeAmountEl, finalPriceEl, finalPriceLabel].forEach(el => {
+                el.classList.remove('pulse');
+                setTimeout(() => el.classList.add('pulse'), 10);
+            });
+
+            // 保存当前计算结果供记账使用
+            window.currentCalculation = {
+                cashM: cashM,
+                ratio: ratio,
+                equipCount: equipCount,
+                bulletCount: bulletCount,
+                deposit: deposit,
+                coinPrice: coinPrice,          // 纯币价
+                equipBulletPrice: equipBulletPrice, // 六套+AWM价格
+                original: originalPrice,
+                fee: feeAmount,
+                final: finalPrice
+            };
+        }
+
+        // 显示账单记录 - 修复删除功能
+        function showRecords() {
+            let records = getRecords();
+            if (records.length === 0) {
+                showToast('暂无记录');
+                return;
+            }
+
+            // 计算统计数据
+            const stats = records.reduce((acc, record) => {
+                acc.totalCashM += record.cashM || 0;
+                acc.totalFee += record.fee || 0;
+                acc.totalDeposit += record.deposit || 0;
+                acc.totalFinal += record.final || 0;
+                acc.totalCoinPrice += record.coinPrice || 0;
+                acc.totalEquipBulletPrice += record.equipBulletPrice || 0;
+                return acc;
+            }, { totalCashM: 0, totalFee: 0, totalDeposit: 0, totalFinal: 0, totalCoinPrice: 0, totalEquipBulletPrice: 0 });
+
+            const feePercentage = stats.totalFinal > 0 ? (stats.totalFee / stats.totalFinal * 100).toFixed(1) : '0.0';
+
+            let recordHtml = `
+                <div style="max-height: 400px; overflow-y: auto; padding: 10px;">
+                    <!-- 统计信息 -->
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #007AFF;">
+                        <h4 style="margin: 0 0 8px 0; color: #333;">📊 账单统计</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 13px;">
+                            <div>
+                                <span style="color: #666;">总现金M:</span>
+                                <span style="font-weight: 600; color: #007AFF;">${stats.totalCashM.toLocaleString()}</span>
+                            </div>
+                            <div>
+                                <span style="color: #666;">总押金:</span>
+                                <span style="font-weight: 600; color: #17a2b8;">¥${stats.totalDeposit.toFixed(2)}</span>
+                            </div>
+                            <div>
+                                <span style="color: #666;">总手续费:</span>
+                                <span style="font-weight: 600; color: #28a745;">¥${stats.totalFee.toFixed(2)}</span>
+                            </div>
+                            <div>
+                                <span style="color: #666;">总交易额:</span>
+                                <span style="font-weight: 600; color: #dc3545;">¥${stats.totalFinal.toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <h3 style="margin: 0;">最近账单 (${Math.min(10, records.length)}/${records.length})</h3>
+                        <button class="btn btn-danger" onclick="clearAllRecords()" style="font-size: 12px; padding: 4px 8px;">
+                            清空全部
+                        </button>
+                    </div>
+            `;
+
+            records.slice(-10).reverse().forEach((r, i) => {
+                const recordIndex = records.length - 1 - i;
+                recordHtml += `
+                    <div class="record-item fade-in" style="position: relative; margin-bottom: 12px; padding: 12px; background: #fff; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 4px;">
+                            <div style="font-weight: 600;">${r.time}</div>
+                            <button onclick="deleteRecord(${recordIndex})" style="background: #dc3545; color: white; border: none; border-radius: 4px; padding: 2px 6px; font-size: 10px; cursor: pointer;">
+                                删除
+                            </button>
+                        </div>
+                        <div style="margin-top: 4px; padding-top: 4px; border-top: 1px solid #eee; font-size: 12px;">
+                            <div><strong>订单详情:</strong> ${r.cashM}现金M × ${r.ratio}比例，${r.equipCount}套装备，${r.bulletCount}发子弹</div>
+                            <div style="margin-top: 2px;"><strong>纯币价:</strong> ¥${r.coinPrice ? r.coinPrice.toFixed(2) : '0.00'}</div>
+                            <div style="margin-top: 2px;"><strong>六套+AWM:</strong> ¥${r.equipBulletPrice ? r.equipBulletPrice.toFixed(2) : '0.00'}</div>
+                            <div style="margin-top: 2px;"><strong>押金:</strong> ¥${r.deposit.toFixed(2)}</div>
+                            <div style="margin-top: 2px;"><strong style="color: #28a745;">手续费:</strong> ¥${r.fee.toFixed(2)}</div>
+                            <div style="margin-top: 2px; font-weight: 600; color: #007AFF;"><strong>总额:</strong> ¥${r.final.toFixed(2)}</div>
+                        </div>
+                    </div>
+                `;
+            });
+
+            recordHtml += '</div>';
+
+            showModal('账单记录', recordHtml);
+        }
+
+        // 清空所有输入
+        function clearAll() {
+            if (confirm('确定要清空所有输入吗？')) {
+                document.getElementById('cashM').value = '';
+                document.getElementById('ratio').value = '';
+                document.getElementById('equipCount').value = '';
+                document.getElementById('bulletCount').value = '';
+                document.getElementById('deposit').value = '';
+                document.querySelector('input[name="feeMode"][value="minus"]').checked = true;
+                
+                // 重置计算结果
+                document.getElementById('coinPrice').innerText = '0.00 元';
+                document.getElementById('equipBulletPrice').innerText = '0.00 元';
+                document.getElementById('feeAmount').innerText = '0.00 元';
+                document.getElementById('finalPrice').innerText = '0.00 元';
+                document.getElementById('depositGroup').style.display = 'none';
+                document.getElementById('depositItem').style.display = 'none';
+                
+                showToast('已清空所有输入');
+            }
+        }
+
+        // 显示联系信息
+        function showContactInfo() {
+            const contactInfo = `
+📞 联系方式
+微信：delta666
+QQ：123456789
+
+💼 专业服务
+✅ 租号服务
+✅ 3x3代练
+✅ 游戏代肝
+✅ 撞车业务
+✅ 安全交易保障
+✅ 24小时在线客服
+
+💰 收费透明
+• 收号主5%纯币手续费
+• 收租客5%纯币手续费
+• 无隐藏费用
+
+点击上方微信/QQ图标查看二维码！
+            `;
+            showModal('联系王六六', contactInfo);
+        }
+
+        // 显示二维码
+        function showQRCode(type, event) {
+            event.stopPropagation(); // 阻止冒泡
+            
+            // 模拟二维码图片链接（实际使用时需要替换为真实的二维码图片）
+            const qrCodes = {
+                wechat: 'https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/4997833cb4e149108271e7d757d674bf.jpg~tplv-a9rns2rl98-24:720:720.image?lk3s=8e244e95&rcl=20260304164845F407E22EBBBC78772504&rrcfp=8a172a1a&x-expires=1773218925&x-signature=fGpC0GR0%2Bm%2BiggbNd4sxBa5q2u0%3D',
+                qq: 'https://p11-flow-imagex-download-sign.byteimg.com/tos-cn-i-a9rns2rl98/c964b5553ca14a55b9b08c78b9feed78.png~tplv-a9rns2rl98-24:720:720.image?lk3s=8e244e95&rcl=20260304164845F407E22EBBBC78772504&rrcfp=8a172a1a&x-expires=1773218925&x-signature=p4h8JjHyn3UfN7KKEH9Mzf6CsMc%3D'
+            };
+            
+            const contactInfo = {
+                wechat: '微信：delta666',
+                qq: 'QQ：123456789'
+            };
+            
+            const qrContent = `
+                <div style="text-align: center; padding: 20px;">
+                    <h4 style="margin: 0 0 16px 0; color: #333;">
+                        ${type === 'wechat' ? '📱 微信二维码' : '💬 QQ二维码'}
+                    </h4>
+                    <div style="display: flex; justify-content: center; margin-bottom: 16px;">
+                        <img src="${qrCodes[type]}" alt="${type} QR Code" style="width: 200px; height: 200px; border-radius: 8px; border: 2px solid #e5e7eb;">
+                    </div>
+                    <p style="margin: 0 0 16px 0; font-size: 16px; font-weight: 600; color: #666;">
+                        ${contactInfo[type]}
+                    </p>
+                    <button class="btn btn-primary" onclick="copyContact('${contactInfo[type]}')" style="margin: 0 auto;">
+                        📋 复制联系方式
+                    </button>
+                    <p style="margin: 12px 0 0 0; font-size: 12px; color: #999;">
+                        请使用${type === 'wechat' ? '微信' : 'QQ'}扫描上方二维码添加好友
+                    </p>
+                </div>
+            `;
+            
+            showModal(type === 'wechat' ? '微信联系方式' : 'QQ联系方式', qrContent);
+            
+            // 添加点击动画
+            const item = event.currentTarget;
+            item.style.transform = 'scale(0.95)';
+            item.style.background = 'rgba(255, 255, 255, 0.3)';
+            setTimeout(() => {
+                item.style.transform = 'scale(1)';
+                item.style.background = 'rgba(255, 255, 255, 0.1)';
+            }, 200);
+        }
+
+        // 复制联系方式
+        function copyContact(text) {
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('复制成功！', 'success');
+                }).catch(() => {
+                    showToast('复制失败，请手动复制', 'error');
+                });
+            } else {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('复制成功！', 'success');
+                } catch (err) {
+                    showToast('复制失败，请手动复制', 'error');
+                }
+                textArea.remove();
+            }
+        }
+
+        // 初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 添加页面加载动画
+            document.body.style.opacity = '0';
+            document.body.style.transition = 'opacity 0.3s ease';
+            setTimeout(() => {
+                document.body.style.opacity = '1';
+            }, 100);
+            
+            // 添加长按记账按钮打开记录功能
+            const saveRecordBtn = document.getElementById('saveRecordBtn');
+            let pressTimer;
+            
+            // 触摸设备长按
+            saveRecordBtn.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                pressTimer = setTimeout(() => {
+                    showRecords();
+                }, 800); // 800毫秒长按
+            });
+            
+            saveRecordBtn.addEventListener('touchend', function() {
+                clearTimeout(pressTimer);
+            });
+            
+            // 鼠标长按
+            saveRecordBtn.addEventListener('mousedown', function() {
+                pressTimer = setTimeout(() => {
+                    showRecords();
+                }, 800); // 800毫秒长按
+            });
+            
+            saveRecordBtn.addEventListener('mouseup', function() {
+                clearTimeout(pressTimer);
+            });
+            
+            saveRecordBtn.addEventListener('mouseleave', function() {
+                clearTimeout(pressTimer);
+            });
+            
+            // ========== 新增：标题长按打开业绩报表 ==========
+            const headerTitle = document.getElementById('headerTitle');
+            
+            // PC端鼠标长按
+            headerTitle.addEventListener('mousedown', function() {
+                headerPressTimer = setTimeout(() => {
+                    showPerformanceReport();
+                    showToast('已打开业绩报表', 'info');
+                }, 800); // 800毫秒长按
+            });
+            
+            headerTitle.addEventListener('mouseup', function() {
+                clearTimeout(headerPressTimer);
+            });
+            
+            headerTitle.addEventListener('mouseleave', function() {
+                clearTimeout(headerPressTimer);
+            });
+            
+            // 移动端触摸长按
+            headerTitle.addEventListener('touchstart', function(e) {
+                e.preventDefault();
+                headerPressTimer = setTimeout(() => {
+                    showPerformanceReport();
+                    showToast('已打开业绩报表', 'info');
+                }, 800); // 800毫秒长按
+            });
+            
+            headerTitle.addEventListener('touchend', function() {
+                clearTimeout(headerPressTimer);
+            });
+            
+            // 点击标题时显示提示
+            headerTitle.addEventListener('click', function() {
+                showToast('长按标题查看业绩报表', 'info');
+            });
+        });
+
+        // 删除单条记录 - 修复核心逻辑
+        function deleteRecord(index) {
+            if (confirm('确定要删除这条记录吗？此操作不可恢复！')) {
+                let records = getRecords();
+                // 修正索引计算（反向显示时的索引对应）
+                const actualIndex = records.length - 1 - index;
+                records.splice(actualIndex, 1);
+                saveRecords(records); // 重新保存完整数组
+                showToast('记录已删除');
+                // 重新加载账单列表
+                showRecords();
+            }
+        }
+
+        // 清空所有记录 - 修复保存逻辑
+        function clearAllRecords() {
+            if (confirm('确定要清空所有账单记录吗？此操作不可恢复！')) {
+                saveRecords([]); // 直接保存空数组
+                showToast('已清空所有记录');
+                // 重新加载账单列表（此时为空）
+                showRecords();
+            }
+        }
+
+        // 显示模态框
+        function showModal(title, content) {
+            // 移除已存在的模态框
+            const existingModal = document.querySelector('.modal');
+            if (existingModal) {
+                existingModal.remove();
+            }
+
+            const modal = document.createElement('div');
+            modal.className = 'modal';
+            modal.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background: rgba(0, 0, 0, 0.5);
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                z-index: 1000;
+                animation: fadeIn 0.2s ease-in;
+            `;
+
+            modal.innerHTML = `
+                <div style="
+                    background: white;
+                    border-radius: 12px;
+                    padding: 20px;
+                    max-width: 90%;
+                    max-height: 80%;
+                    overflow-y: auto;
+                    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+                    animation: slideIn 0.3s ease-out;
+                ">
+                    <div style="
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        margin-bottom: 16px;
+                        padding-bottom: 12px;
+                        border-bottom: 1px solid #eee;
+                    ">
+                        <h3 style="margin: 0; font-size: 18px; color: #333;">${title}</h3>
+                        <button onclick="this.closest('.modal').remove()" style="
+                            background: none;
+                            border: none;
+                            font-size: 24px;
+                            cursor: pointer;
+                            color: #999;
+                            padding: 0;
+                            width: 30px;
+                            height: 30px;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                        ">×</button>
+                    </div>
+                    <div>${content}</div>
+                </div>
+            `;
+
+            document.body.appendChild(modal);
+
+            // 点击背景关闭
+            modal.addEventListener('click', (e) => {
+                if (e.target === modal) {
+                    modal.remove();
+                }
+            });
+        }
+
+        // 显示提示消息
+        function showToast(message, type = 'info', duration = 3000) {
+            // 移除已存在的toast
+            const existingToast = document.querySelector('.toast');
+            if (existingToast) {
+                existingToast.remove();
+            }
+
+            const toast = document.createElement('div');
+            toast.className = 'toast';
+            
+            const colors = {
+                success: '#28a745',
+                error: '#dc3545',
+                info: '#007AFF',
+                warning: '#ffc107'
+            };
+
+            const icons = {
+                success: '✅',
+                error: '❌',
+                info: 'ℹ️',
+                warning: '⚠️'
+            };
+
+            toast.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                background: ${colors[type] || colors.info};
+                color: white;
+                padding: 12px 20px;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 1001;
+                animation: slideInRight 0.3s ease-out;
+                font-size: 14px;
+                font-weight: 500;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+            `;
+
+            toast.innerHTML = `${icons[type] || icons.info} ${message}`;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideOutRight 0.3s ease-in';
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+
+        // 添加CSS动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateY(-50px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+            @keyframes slideInRight {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOutRight {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // 复制到剪贴板功能
+        function copyToClipboard(elementId) {
+            const element = document.getElementById(elementId);
+            const text = element.textContent.trim().replace('复制', '').trim();
+            
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(text).then(() => {
+                    showToast('复制成功！', 'success');
+                    // 添加复制动画
+                    const btn = element.querySelector('.copy-btn');
+                    if (btn) {
+                        btn.innerHTML = '<i class="fa fa-check"></i>';
+                        btn.style.background = '#28a745';
+                        btn.style.color = 'white';
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="fa fa-copy"></i>';
+                            btn.style.background = 'rgba(0, 122, 255, 0.1)';
+                            btn.style.color = '#007AFF';
+                        }, 1000);
+                    }
+                }).catch(() => {
+                    showToast('复制失败，请手动复制', 'error');
+                });
+            } else {
+                // 降级方案
+                const textArea = document.createElement('textarea');
+                textArea.value = text;
+                textArea.style.position = 'fixed';
+                textArea.style.left = '-999999px';
+                textArea.style.top = '-999999px';
+                document.body.appendChild(textArea);
+                textArea.focus();
+                textArea.select();
+                try {
+                    document.execCommand('copy');
+                    showToast('复制成功！', 'success');
+                } catch (err) {
+                    showToast('复制失败，请手动复制', 'error');
+                }
+                textArea.remove();
+            }
+        }
+
+        // 生成图表
+        function generateChart(canvasId, labels, data, label, color) {
+            const ctx = document.getElementById(canvasId).getContext('2d');
+            return new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: label,
+                        data: data,
+                        borderColor: color,
+                        backgroundColor: color + '20',
+                        borderWidth: 2,
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            labels: {
+                                color: '#333'
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                color: '#666'
+                            },
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#666'
+                            },
+                            grid: {
+                                color: '#e5e7eb'
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // 显示业绩报表
+        function showPerformanceReport() {
+            const records = getRecords();
+            if (records.length === 0) {
+                showToast('暂无数据生成报表', 'warning');
+                return;
+            }
+
+            // 按日期分组数据
+            const dailyData = {};
+            records.forEach(record => {
+                const date = record.time.split(' ')[0];
+                if (!dailyData[date]) {
+                    dailyData[date] = {
+                        transactions: 0,
+                        totalAmount: 0,
+                        totalFee: 0,
+                        totalCashM: 0
+                    };
+                }
+                dailyData[date].transactions++;
+                dailyData[date].totalAmount += record.final;
+                dailyData[date].totalFee += record.fee;
+                dailyData[date].totalCashM += record.cashM;
+            });
+
+            // 生成图表数据
+            const dates = Object.keys(dailyData).slice(-7); // 最近7天
+            const amounts = dates.map(date => dailyData[date].totalAmount);
+            const fees = dates.map(date => dailyData[date].totalFee);
+            const transactions = dates.map(date => dailyData[date].transactions);
+
+            const reportContent = `
+                <div style="max-height: 600px; overflow-y: auto; padding: 10px;">
+                    <!-- 统计概览 -->
+                    <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                        <h4 style="margin: 0 0 12px 0; color: #333;">📊 业绩概览</h4>
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 12px; font-size: 13px;">
+                            <div style="text-align: center; padding: 8px; background: #fff; border-radius: 8px;">
+                                <div style="color: #666;">总交易笔数</div>
+                                <div style="font-size: 18px; font-weight: 600; color: #007AFF;">${records.length}</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #fff; border-radius: 8px;">
+                                <div style="color: #666;">总交易额</div>
+                                <div style="font-size: 18px; font-weight: 600; color: #28a745;">¥${records.reduce((sum, r) => sum + r.final, 0).toFixed(2)}</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #fff; border-radius: 8px;">
+                                <div style="color: #666;">总手续费</div>
+                                <div style="font-size: 18px; font-weight: 600; color: #ffc107;">¥${records.reduce((sum, r) => sum + r.fee, 0).toFixed(2)}</div>
+                            </div>
+                            <div style="text-align: center; padding: 8px; background: #fff; border-radius: 8px;">
+                                <div style="color: #666;">平均比例</div>
+                                <div style="font-size: 18px; font-weight: 600; color: #17a2b8;">${(records.reduce((sum, r) => sum + r.ratio, 0) / records.length).toFixed(2)}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 导出按钮 -->
+                    <div style="display: flex; gap: 8px; margin-top: 16px;">
+                        <button class="btn btn-primary" onclick="exportReport()" style="flex: 1;">📤 导出报表</button>
+                        <button class="btn btn-secondary" onclick="compareAnalysis()" style="flex: 1;">📊 对比分析</button>
+                    </div>
+                </div>
+            `;
+
+            showModal('业绩报表', reportContent);
+        }
+
+        // 导出报表
+        function exportReport() {
+            const records = getRecords();
+            if (records.length === 0) {
+                showToast('暂无数据导出', 'warning');
+                return;
+            }
+
+            let csv = '日期时间,现金M,兑换比例,装备数量,子弹数量,纯币价(元),六套+AWM(元),原价(元),手续费(元),押金(元),总价(元)\n';
+            records.forEach(record => {
+                csv += `${record.time},${record.cashM},${record.ratio},${record.equipCount},${record.bulletCount},${record.coinPrice.toFixed(2)},${record.equipBulletPrice.toFixed(2)},${record.original.toFixed(2)},${record.fee.toFixed(2)},${record.deposit.toFixed(2)},${record.final.toFixed(2)}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', `王六六商行报表_${new Date().toISOString().split('T')[0]}.csv`);
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+
+            showToast('报表导出成功！', 'success');
+        }
+
+        // 对比分析
+        function compareAnalysis() {
+            const records = getRecords();
+            if (records.length < 2) {
+                showToast('数据量不足，无法进行对比分析', 'warning');
+                return;
+            }
+
+            // 计算统计数据
+            const stats = {
+                totalTransactions: records.length,
+                totalFee: records.reduce((sum, r) => sum + r.fee, 0),
+                totalDeposit: records.reduce((sum, r) => sum + r.deposit, 0),
+                totalCoinPrice: records.reduce((sum, r) => sum + (r.coinPrice || 0), 0),
+                totalEquipBulletPrice: records.reduce((sum, r) => sum + (r.equipBulletPrice || 0), 0),
+                avgRatio: records.reduce((sum, r) => sum + r.ratio, 0) / records.length,
+                maxAmount: Math.max(...records.map(r => r.final)),
+                minAmount: Math.min(...records.map(r => r.final))
+            };
+
+            // 按收费模式分析
+            const feeModeAnalysis = records.reduce((acc, record) => {
+                const mode = record.final < record.original ? '收号主' : '收租客';
+                if (!acc[mode]) {
+                    acc[mode] = { count: 0, total: 0, avg: 0 };
+                }
+                acc[mode].count++;
+                acc[mode].total += record.final;
+                acc[mode].avg = acc[mode].total / acc[mode].count;
+                return acc;
+            }, {});
+
+            const analysisContent = `
+                <div style="max-height: 60vh; overflow-y: auto; padding: 10px;">
+                    <div style="background: #f8f9fa; padding: 16px; border-radius: 12px; margin-bottom: 20px;">
+                        <!-- 扇形图 -->
+                        <div style="margin-bottom: 20px;">
+                            <h5 style="margin: 0 0 12px 0; color: #666;">📊 收入构成分析</h5>
+                            <div style="display: flex; justify-content: center; padding: 10px; background: #fff; border-radius: 8px;">
+                                <canvas id="pieChart" width="300" height="300"></canvas>
+                            </div>
+                        </div>
+
+                        <div style="margin-bottom: 16px;">
+                            <h5 style="margin: 0 0 8px 0; color: #666;">📈 收费模式分析</h5>
+                            ${Object.entries(feeModeAnalysis).map(([mode, data]) => `
+                                <div style="margin-bottom: 8px; padding: 8px; background: #fff; border-radius: 6px;">
+                                    <div style="font-weight: 600; margin-bottom: 4px;">${mode}</div>
+                                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; font-size: 11px;">
+                                        <span>笔数: ${data.count}</span>
+                                        <span>总额: ¥${data.total.toFixed(2)}</span>
+                                        <span>均价: ¥${data.avg.toFixed(2)}</span>
+                                    </div>
+                                </div>
+                            `).join('')}
+                        </div>
+
+                        <div>
+                            <h5 style="margin: 0 0 8px 0; color: #666;">💡 经营建议</h5>
+                            <div style="font-size: 12px; line-height: 1.5; color: #666;">
+                                ${stats.avgRatio > 100 ? '• 平均比例较高，建议保持当前定价策略<br>' : '• 平均比例较低，可考虑调整定价或增加增值服务<br>'}
+                                ${stats.totalFee > 500 ? '• 手续费总额较高，运营状况良好<br>' : '• 手续费总额较低，建议扩大业务规模<br>'}
+                                ${feeModeAnalysis['收租客'] && feeModeAnalysis['收租客'].count > feeModeAnalysis['收号主'].count ? '• 收租客模式使用较多，建议重点维护租客关系<br>' : '• 收号主模式使用较多，建议重点维护号主关系<br>'}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            showModal('经营分析报告', analysisContent);
+            
+            // 等待模态框显示后初始化图表
+            setTimeout(() => {
+                initCharts(stats, records);
+            }, 100);
+        }
+        
+        // 初始化图表
+        function initCharts(stats, records) {
+            // 扇形图 - 收入构成分析
+            const pieCtx = document.getElementById('pieChart');
+            if (pieCtx) {
+                new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: ['纯币价', '六套+AWM', '手续费', '押金'],
+                        datasets: [{
+                            data: [stats.totalCoinPrice, stats.totalEquipBulletPrice, stats.totalFee, stats.totalDeposit],
+                            backgroundColor: [
+                                '#007AFF',
+                                '#28a745',
+                                '#ffc107',
+                                '#17a2b8'
+                            ],
+                            borderWidth: 2,
+                            borderColor: '#fff'
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom',
+                                labels: {
+                                    color: '#333',
+                                    font: {
+                                        size: 12
+                                    }
+                                }
+                            },
+                            tooltip: {
+                                callbacks: {
+                                    label: function(context) {
+                                        const value = context.parsed;
+                                        const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                        const percentage = ((value / total) * 100).toFixed(1);
+                                        return `${context.label}: ¥${value.toFixed(2)} (${percentage}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // 手动记账函数 - 补充完整数据记录
+        function saveRecord() {
+            const calc = window.currentCalculation;
+            if (!calc || calc.cashM <= 0 || calc.final <= 0) {
+                showToast('请先输入有效数据并计算', 'error');
+                return;
+            }
+            
+            // 检查是否有重复记录
+            const existingRecords = getRecords();
+            const isDuplicate = existingRecords.some(record => 
+                record.cashM === calc.cashM &&
+                record.ratio === calc.ratio &&
+                record.equipCount === calc.equipCount &&
+                record.bulletCount === calc.bulletCount &&
+                record.deposit === calc.deposit &&
+                Math.abs(record.final - calc.final) < 0.01
+            );
+            
+            if (isDuplicate) {
+                if (!confirm('检测到相同的交易数据，确定要记录这条重复的账单吗？')) {
+                    return;
+                }
+            }
+
+            // 完整记录所有价格数据
+            const record = {
+                time: new Date().toLocaleString(),
+                original: calc.original,
+                fee: calc.fee,
+                deposit: calc.deposit,
+                final: calc.final,
+                cashM: calc.cashM,
+                ratio: calc.ratio,
+                equipCount: calc.equipCount,
+                bulletCount: calc.bulletCount,
+                coinPrice: calc.coinPrice,          // 纯币价
+                equipBulletPrice: calc.equipBulletPrice // 六套+AWM价格
+            };
+
+            addRecord(record);
+            
+            // 添加成功动画效果
+            const saveBtn = document.querySelector('button[onclick="saveRecord()"]');
+            const originalText = saveBtn.textContent;
+            saveBtn.innerHTML = '✅ 已保存';
+            saveBtn.disabled = true;
+            saveBtn.style.background = '#28a745';
+            
+            setTimeout(() => {
+                saveBtn.textContent = originalText;
+                saveBtn.disabled = false;
+                saveBtn.style.background = '#007AFF';
+            }, 1500);
+
+            showToast('记账成功！', 'success');
+        }
+    </script>
+</body>
+</html>
